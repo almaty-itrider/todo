@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi import Depends, Query
 from sqlmodel import Session, select
@@ -8,11 +9,11 @@ from db.settings import get_session
 from db.settings import create_db_and_tables
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield create_db_and_tables()
 
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/statuses/", response_model=list[StatusPublic])
