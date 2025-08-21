@@ -5,8 +5,9 @@ from sqlmodel import Session, select
 
 from db.models.status import Status
 from schemas.status import StatusCreate, StatusPublic
-from db.settings import get_session
-from db.settings import create_db_and_tables
+from db.settings import get_session, create_db_and_tables
+from schemas.type import TypeCreate, TypePublic
+from db.models.type import Type
 
 
 @asynccontextmanager
@@ -38,3 +39,27 @@ def create_status(
     session.commit()
     session.refresh(db_status)
     return db_status
+
+
+@app.get("/types/", response_model=list[TypePublic])
+def read_types(
+    *,
+    session: Session = Depends(get_session),
+    offset: int = 0,
+    limit: int = Query(default=10, le=10),
+):
+    types = session.exec(select(Type).offset(offset).limit(limit)).all()
+    return types
+
+
+@app.post("/types/", response_model=TypePublic)
+def create_type(
+    *,
+    session: Session = Depends(get_session),
+    type: TypeCreate,
+):
+    db_type = Status.model_validate(type)
+    session.add(db_type)
+    session.commit()
+    session.refresh(db_type)
+    return db_type
