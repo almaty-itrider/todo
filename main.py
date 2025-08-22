@@ -1,18 +1,19 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
-from fastapi import Depends, Query
+
+from fastapi import Depends, FastAPI, Query
 from sqlmodel import Session, select
 
 from db.models.status import Status
-from schemas.status import StatusCreate, StatusPublic
-from db.settings import get_session, create_db_and_tables
-from schemas.type import TypeCreate, TypePublic
 from db.models.type import Type
+from db.settings import create_db_and_tables, get_session
+from schemas.status import StatusCreate, StatusPublic
+from schemas.type import TypeCreate, TypePublic
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield create_db_and_tables()
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -58,7 +59,7 @@ def create_type(
     session: Session = Depends(get_session),
     type: TypeCreate,
 ):
-    db_type = Status.model_validate(type)
+    db_type = Type.model_validate(type)
     session.add(db_type)
     session.commit()
     session.refresh(db_type)
