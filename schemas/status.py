@@ -13,3 +13,7 @@ class StatusCreate(StatusBase):
 
 class StatusPublic(StatusBase):
     id: uuid.UUID
+
+
+class StatusUpdate(SQLModel):
+    name: str | None = None

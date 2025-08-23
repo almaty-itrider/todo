@@ -1,13 +1,15 @@
 from contextlib import asynccontextmanager
+import uuid
 
 from fastapi import Depends, FastAPI, Query
+from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 
 from db.models.status import Status
 from db.models.type import Type
 from db.settings import create_db_and_tables, get_session
-from schemas.status import StatusCreate, StatusPublic
+from schemas.status import StatusCreate, StatusPublic, StatusUpdate
 from schemas.type import TypeCreate, TypePublic
 
 
@@ -40,6 +42,18 @@ def read_statuses(
     return statuses
 
 
+@app.get("/status/{status_id}", response_model=StatusPublic)
+def read_status(
+    *,
+    session: Session = Depends(get_session),
+    status_id: uuid.UUID,
+):
+    status = session.get(Status, status_id)
+    if not status:
+        raise HTTPException(status_code=404, detail="Status not found")
+    return status
+
+
 @app.post("/statuses/", response_model=StatusPublic)
 def create_status(
     *,
@@ -51,6 +65,38 @@ def create_status(
     session.commit()
     session.refresh(db_status)
     return db_status
+
+
+@app.patch("/status/{status_id}", response_model=StatusPublic)
+def update_status(
+    *,
+    session: Session = Depends(get_session),
+    status_id: uuid.UUID,
+    status: StatusUpdate,
+):
+    db_status = session.get(Status, status_id)
+    if not db_status:
+        raise HTTPException(status_code=404, detail="Status not found")
+    status_data = status.model_dump(exclude_unset=True)
+    db_status.sqlmodel_update(status_data)
+    session.add(db_status)
+    session.commit()
+    session.refresh(db_status)
+    return db_status
+
+
+@app.delete("/status/{status_id}")
+def delete_status(
+    *,
+    session: Session = Depends(get_session),
+    status_id: uuid.UUID,
+):
+    status = session.get(Status, status_id)
+    if not status:
+        raise HTTPException(status_code=404, detail="Status not found")
+    session.delete(status)
+    session.commit()
+    return {"ok": True}
 
 
 @app.get("/types/", response_model=list[TypePublic])
