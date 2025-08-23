@@ -1,7 +1,9 @@
 import uuid
+
 from sqlmodel import Field
-from schemas.type import TypeBase
+
+from app.schemas.status import StatusBase
 
 
-class Type(TypeBase, table=True):
+class Status(StatusBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)

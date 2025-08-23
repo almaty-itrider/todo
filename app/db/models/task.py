@@ -2,7 +2,8 @@ import uuid
 
 from datetime import datetime
 from sqlmodel import Field
-from schemas.task import TaskBase
+
+from app.schemas.task import TaskBase
 
 
 class Task(TaskBase, table=True):

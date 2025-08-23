@@ -13,3 +13,7 @@ class TypeCreate(TypeBase):
 
 class TypePublic(TypeBase):
     id: uuid.UUID
+
+
+class TypeUpdate(SQLModel):
+    name: str | None = None
