@@ -44,7 +44,7 @@ def create_type(
     session: Session = Depends(get_session),
     type: TypeCreate,
 ):
-    db_type = type.model_validate(type)
+    db_type = Type.model_validate(type)
     session.add(db_type)
     session.commit()
     session.refresh(db_type)
