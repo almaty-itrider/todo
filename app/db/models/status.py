@@ -2,8 +2,12 @@ import uuid
 
 from datetime import datetime
 from sqlmodel import Field, Relationship
+from typing import TYPE_CHECKING
 
 from app.schemas.status import StatusBase
+
+if TYPE_CHECKING:
+    from .task import Task
 
 
 class Status(StatusBase, table=True):
